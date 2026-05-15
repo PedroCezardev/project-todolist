@@ -1,0 +1,94 @@
+.container{
+    padding: 20px;
+    width: 99%;
+    height: 98%;
+    background: #FEFEFE;
+    border-radius: 20px;
+    transition: max-width 0.2s ease-in-out;
+    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.158);;
+    transition: box-shadow .5s, transform .3s;
+}
+
+$spacing: 1.5rem;
+$card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+$card-radius: 8px;
+$breakpoint-md: 768px;
+$alert-padding: 1rem 1.5rem;
+
+.mainTitle {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: $spacing;
+}
+
+.chartsGrid {
+    display: grid;
+    gap: $spacing;
+    grid-template-columns: 1fr;
+
+    @media (min-width: $breakpoint-md) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.colSpan2 {
+    @media (min-width: $breakpoint-md) {
+        grid-column: span 2;
+    }
+}
+
+.colSpan3 {
+    @media (min-width: $breakpoint-md) {
+        grid-column: span 3;
+    }
+}
+
+.chartCard {
+    background-color: white;
+    padding: $spacing;
+    box-shadow: $card-shadow;
+    border-radius: $card-radius;
+    display: flex;
+    flex-direction: column;
+
+    .chartTitle {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    
+    .chartWrapper {
+        flex-grow: 1;
+        min-height: 0;
+    }
+}
+
+.alertBox {
+    padding: $alert-padding;
+    margin-bottom: $spacing;
+    border-radius: $card-radius;
+    border-left: 5px solid;
+
+    .alertText {
+        font-weight: 600;
+        margin: 0;
+    }
+}
+
+.alertDanger {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+    color: #b91c1c;
+}
+
+.alertWarning {
+    background-color: #fffbeb;
+    border-color: #f59e0b;
+    color: #b45309;
+}
+
+.alertSuccess {
+    background-color: #d1fae5;
+    border-color: #10b981;
+    color: #065f46;
+}
