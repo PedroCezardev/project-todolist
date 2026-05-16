@@ -89,3 +89,23 @@ export const excluirTarefa = async (id: string) => {
     return false;
   }
 };
+
+export const atualizarTarefa = async (
+  id: string,
+  dados: Pick<TarefaData, 'titulo' | 'categoria' | 'dificuldade'>
+) => {
+  const Tarefa = Parse.Object.extend("Tarefa");
+  const query = new Parse.Query(Tarefa);
+
+  try {
+    const tarefa = await query.get(id);
+    tarefa.set("titulo", dados.titulo);
+    tarefa.set("categoria", dados.categoria);
+    tarefa.set("dificuldade", dados.dificuldade);
+    await tarefa.save();
+    return true;
+  } catch (error) {
+    console.error("Erro ao atualizar tarefa: ", error);
+    return false;
+  }
+};

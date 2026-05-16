@@ -9,13 +9,23 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   RowSelectionState,
 } from '@tanstack/react-table';
-// Adicionei o icone Trash2 aqui
-import { ChevronDown, PlusCircle, Trophy, CheckCircle2, Circle, Trash2 } from 'lucide-react';
+import {
+  PlusCircle,
+  Pencil,
+  Sparkles,
+  Trophy,
+  CheckCircle2,
+  Circle,
+  Trash2,
+  User,
+  BookOpen,
+  Briefcase,
+  Heart,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -27,7 +37,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  Table,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   TableBody,
   TableCell,
   TableHead,
@@ -37,8 +53,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-// IMPORTANTE: Adicionei excluirTarefa na importação
-import { TarefaData, listarTarefas, criarTarefa, toggleConcluirTarefa, excluirTarefa } from '@/services/tarefaService';
+import {
+  TarefaData,
+  listarTarefas,
+  criarTarefa,
+  toggleConcluirTarefa,
+  excluirTarefa,
+  atualizarTarefa,
+} from '@/services/tarefaService';
 
 interface ToastMessage {
   severity: 'success' | 'error' | 'warning';
@@ -48,21 +70,40 @@ interface ToastMessage {
 
 const tarefaDataPadrao: TarefaData = {
   titulo: '',
-  categoria: 'Estudos', // Defina um valor padrão que exista no seu Select
+  categoria: 'Estudos',
   dificuldade: 'Fácil',
   concluido: false,
 };
+
+const CATEGORIAS_INFO = [
+  { value: 'Pessoal', icon: User },
+  { value: 'Estudos', icon: BookOpen },
+  { value: 'Trabalho', icon: Briefcase },
+  { value: 'Saúde', icon: Heart },
+] as const;
+
+const DIFICULDADES_INFO = [
+  { value: 'Fácil', xp: 10, dotClass: 'bg-green-500' },
+  { value: 'Médio', xp: 30, dotClass: 'bg-yellow-500' },
+  { value: 'Difícil', xp: 50, dotClass: 'bg-red-500' },
+] as const;
+
+const getXP = (dif: string) =>
+  DIFICULDADES_INFO.find((d) => d.value === dif)?.xp ?? 0;
+
+const getCategoriaIcon = (cat: string) =>
+  CATEGORIAS_INFO.find((c) => c.value === cat)?.icon ?? User;
 
 export default function TarefaTable() {
   const [tarefas, setTarefas] = useState<TarefaData[]>([]);
   const [tarefaDialog, setTarefaDialog] = useState(false);
   const [tarefaEmEdicao, setTarefaEmEdicao] = useState<TarefaData>(tarefaDataPadrao);
-  
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  
+
   const [mensagem, setMensagem] = useState<ToastMessage | null>(null);
 
   const xpTotal = useMemo(() => {
@@ -90,15 +131,34 @@ export default function TarefaTable() {
     carregarTarefas();
   }, []);
 
+  const handleDialogChange = (open: boolean) => {
+    setTarefaDialog(open);
+    if (!open) {
+      setTarefaEmEdicao(tarefaDataPadrao);
+    }
+  };
+
   const saveTarefa = async () => {
     if (!tarefaEmEdicao.titulo.trim()) {
       showToast({ severity: 'error', summary: 'Erro', detail: 'O título é obrigatório.' });
       return;
     }
 
+    const isEdicao = !!tarefaEmEdicao.objectId;
+
     try {
-      await criarTarefa(tarefaEmEdicao);
-      showToast({ severity: 'success', summary: 'Sucesso', detail: 'Tarefa criada! +XP disponível.' });
+      if (isEdicao && tarefaEmEdicao.objectId) {
+        const sucesso = await atualizarTarefa(tarefaEmEdicao.objectId, {
+          titulo: tarefaEmEdicao.titulo,
+          categoria: tarefaEmEdicao.categoria,
+          dificuldade: tarefaEmEdicao.dificuldade,
+        });
+        if (!sucesso) throw new Error('Falha ao atualizar');
+        showToast({ severity: 'success', summary: 'Sucesso', detail: 'Missão atualizada!' });
+      } else {
+        await criarTarefa(tarefaEmEdicao);
+        showToast({ severity: 'success', summary: 'Sucesso', detail: 'Missão criada! +XP disponível.' });
+      }
       setTarefaDialog(false);
       setTarefaEmEdicao(tarefaDataPadrao);
       carregarTarefas();
@@ -108,33 +168,40 @@ export default function TarefaTable() {
     }
   };
 
+  const handleSubmitDialog = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    saveTarefa();
+  };
+
+  const handleEdit = (tarefa: TarefaData) => {
+    setTarefaEmEdicao(tarefa);
+    setTarefaDialog(true);
+  };
+
   const handleToggleConcluir = async (tarefa: TarefaData) => {
     if (!tarefa.objectId) return;
 
-    const novasTarefas = tarefas.map(t => 
+    const novasTarefas = tarefas.map(t =>
         t.objectId === tarefa.objectId ? { ...t, concluido: !t.concluido } : t
     );
     setTarefas(novasTarefas);
 
     const sucesso = await toggleConcluirTarefa(tarefa.objectId, tarefa.concluido);
-    
+
     if (!sucesso) {
         showToast({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar status.' });
-        carregarTarefas(); 
+        carregarTarefas();
     } else {
         const msg = !tarefa.concluido ? "Tarefa Concluída! XP Ganho! 🚀" : "Tarefa reaberta.";
         showToast({ severity: 'success', summary: 'Sucesso', detail: msg });
     }
   };
 
-  // --- NOVA FUNÇÃO DE EXCLUIR ---
   const handleDelete = async (id?: string) => {
     if (!id) return;
-    
-    // Confirmação simples
+
     if (!confirm("Tem certeza que deseja excluir esta missão?")) return;
 
-    // Atualização otimista
     setTarefas(prev => prev.filter(t => t.objectId !== id));
 
     const sucesso = await excluirTarefa(id);
@@ -142,7 +209,7 @@ export default function TarefaTable() {
         showToast({ severity: 'success', summary: 'Sucesso', detail: 'Tarefa excluída.' });
     } else {
         showToast({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir.' });
-        carregarTarefas(); // Reverte se der erro
+        carregarTarefas();
     }
   }
 
@@ -150,7 +217,6 @@ export default function TarefaTable() {
     {
       id: 'status',
       header: 'Status',
-      // MELHORIA 1: Status com Texto e Ícone
       cell: ({ row }) => {
         const tarefa = row.original;
         return (
@@ -202,20 +268,31 @@ export default function TarefaTable() {
         )
       },
     },
-    // MELHORIA 2: Botão de Excluir
     {
         id: 'actions',
         header: 'Ações',
         cell: ({ row }) => {
             return (
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => handleDelete(row.original.objectId)}
-                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                >
-                    <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(row.original)}
+                        className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                        title="Editar missão"
+                    >
+                        <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(row.original.objectId)}
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                        title="Excluir missão"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
             )
         }
     }
@@ -227,7 +304,6 @@ export default function TarefaTable() {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
@@ -236,9 +312,11 @@ export default function TarefaTable() {
   });
 
   const onInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>, name: keyof TarefaData) => {
-    // Força a tipagem do prev para evitar erro
     setTarefaEmEdicao((prev: TarefaData) => ({ ...prev, [name]: e.target.value }));
   };
+
+  const CategoriaIconAtual = getCategoriaIcon(tarefaEmEdicao.categoria);
+  const xpAtual = getXP(tarefaEmEdicao.dificuldade);
 
   return (
     <div className="w-full space-y-4">
@@ -258,93 +336,174 @@ export default function TarefaTable() {
                 <Trophy className="h-5 w-5 text-yellow-400" />
                 <span className="font-bold text-lg">{xpTotal} XP</span>
             </div>
-            <Button onClick={() => setTarefaDialog(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button onClick={() => setTarefaDialog(true)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
                 <PlusCircle className="mr-2 h-4 w-4" /> Nova Missão
             </Button>
         </div>
       </div>
 
-      <div className="rounded-md border bg-white shadow">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+      <div className="rounded-md border bg-white shadow overflow-hidden">
+        <div className="max-h-[75vh] overflow-auto">
+          <table className="w-full caption-bottom text-sm min-w-[800px] lg:min-w-0">
+            <TableHeader className="sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgb(0_0_0_/_0.06)]">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Nenhuma missão encontrada. Bora proatividar?
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    Nenhuma missão encontrada. Bora proatividar?
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </table>
+        </div>
       </div>
 
-      <Dialog open={tarefaDialog} onOpenChange={setTarefaDialog}>
-        <DialogContent className='bg-white'>
-            <DialogHeader>
-                <DialogTitle>Nova Missão</DialogTitle>
-                <DialogDescription>Defina sua tarefa e o nível de dificuldade para ganhar XP.</DialogDescription>
+      <Dialog open={tarefaDialog} onOpenChange={handleDialogChange}>
+        <DialogContent className="bg-white sm:max-w-md p-0 gap-0">
+          <form onSubmit={handleSubmitDialog}>
+            <DialogHeader className="p-6 pb-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 shrink-0">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div className="text-left">
+                  <DialogTitle className="text-xl">
+                    {tarefaEmEdicao.objectId ? 'Editar Missão' : 'Nova Missão'}
+                  </DialogTitle>
+                  <DialogDescription className="text-sm">
+                    {tarefaEmEdicao.objectId
+                      ? 'Ajuste os detalhes da sua missão'
+                      : 'Defina sua tarefa para ganhar XP'}
+                  </DialogDescription>
+                </div>
+              </div>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                    <Label>Título da Tarefa</Label>
-                    <Input 
-                        value={tarefaEmEdicao.titulo} 
-                        onChange={(e) => onInputChange(e, 'titulo')}
-                        placeholder="Ex: Estudar React" 
-                    />
+
+            <div className="px-6 py-5 space-y-5">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="titulo-tarefa"
+                  className="text-xs font-semibold text-gray-600 uppercase tracking-wide"
+                >
+                  Título
+                </Label>
+                <Input
+                  id="titulo-tarefa"
+                  value={tarefaEmEdicao.titulo}
+                  onChange={(e) => onInputChange(e, 'titulo')}
+                  placeholder="Ex: Estudar React"
+                  autoFocus
+                  className="h-10"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Categoria
+                  </Label>
+                  <Select
+                    value={tarefaEmEdicao.categoria}
+                    onValueChange={(value) =>
+                      setTarefaEmEdicao((prev: TarefaData) => ({ ...prev, categoria: value }))
+                    }
+                  >
+                    <SelectTrigger className="h-10">
+                      <span className="flex items-center gap-2">
+                        <CategoriaIconAtual className="h-4 w-4 text-gray-500 shrink-0" />
+                        <SelectValue />
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      {CATEGORIAS_INFO.map(({ value, icon: Icon }) => (
+                        <SelectItem key={value} value={value}>
+                          <span className="flex items-center gap-2">
+                            <Icon className="h-4 w-4 text-gray-500" />
+                            {value}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                {/* MELHORIA 3: Select de Categoria Corrigido */}
-                <div className="grid gap-2">
-                    <Label>Categoria</Label>
-                    <select 
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={tarefaEmEdicao.categoria} 
-                        onChange={(e) => onInputChange(e, 'categoria')}
-                    >
-                        <option value="Estudos">Estudos</option>
-                        <option value="Trabalho">Trabalho</option>
-                        <option value="Saúde">Saúde</option>
-                        <option value="Pessoal">Pessoal</option>
-                    </select>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Dificuldade
+                  </Label>
+                  <Select
+                    value={tarefaEmEdicao.dificuldade}
+                    onValueChange={(value) =>
+                      setTarefaEmEdicao((prev: TarefaData) => ({ ...prev, dificuldade: value }))
+                    }
+                  >
+                    <SelectTrigger className="h-10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      {DIFICULDADES_INFO.map(({ value, xp, dotClass }) => (
+                        <SelectItem key={value} value={value}>
+                          <span className="flex items-center gap-2">
+                            <span className={`h-2.5 w-2.5 rounded-full ${dotClass}`} />
+                            {value} · {xp} XP
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="grid gap-2">
-                    <Label>Dificuldade</Label>
-                    <select 
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={tarefaEmEdicao.dificuldade}
-                        onChange={(e) => onInputChange(e, 'dificuldade')}
-                    >
-                        <option value="Fácil">Fácil (10 XP)</option>
-                        <option value="Médio">Médio (30 XP)</option>
-                        <option value="Difícil">Difícil (50 XP)</option>
-                    </select>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50/60 px-4 py-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-100 shrink-0">
+                  <Trophy className="h-4 w-4 text-yellow-600" />
                 </div>
+                <div className="text-sm leading-snug">
+                  <span className="text-gray-600">Você ganhará </span>
+                  <span className="font-bold text-gray-900">{xpAtual} XP</span>
+                  <span className="text-gray-600"> ao completar essa missão.</span>
+                </div>
+              </div>
             </div>
-            <DialogFooter>
-                <Button variant="outline" onClick={() => setTarefaDialog(false)}>Cancelar</Button>
-                <Button onClick={saveTarefa}>Criar Missão</Button>
+
+            <DialogFooter className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 sm:rounded-b-lg">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleDialogChange(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                {tarefaEmEdicao.objectId ? 'Salvar Alterações' : 'Criar Missão'}
+              </Button>
             </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
