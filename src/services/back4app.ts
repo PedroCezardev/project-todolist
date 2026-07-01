@@ -1,4 +1,6 @@
-import Parse from 'parse';
+import type ParseType from 'parse';
+
+const Parse: typeof ParseType = typeof window !== 'undefined' ? require('parse') : require('parse/node');
 
 if (!Parse.applicationId) {
   Parse.initialize(
