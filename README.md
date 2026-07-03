@@ -1,4 +1,4 @@
-# 🚀 Dashboard Turbo: Gerenciador de Proatividade Gamificado
+# 🚀 Tarefex: Gerenciador de Proatividade Gamificado
 
 > Projeto desenvolvido durante o Workshop de Desenvolvimento Full-Stack Moderno.
 
@@ -9,7 +9,7 @@
 
 ## 📖 Sobre o Projeto
 
-O **Dashboard Turbo** é uma aplicação web Full-Stack focada em produtividade e gamificação. Diferente de uma lista de tarefas comum, este projeto calcula o **XP (Experiência)** do usuário com base na dificuldade das tarefas concluídas, incentivando a produtividade através de métricas visuais.
+O **Tarefex** é uma aplicação web Full-Stack focada em produtividade e gamificação. Diferente de uma lista de tarefas comum, este projeto calcula o **XP (Experiência)** do usuário com base na dificuldade das tarefas concluídas, incentivando a produtividade através de métricas visuais.
 
 O objetivo do projeto foi demonstrar a construção de uma aplicação moderna utilizando **Next.js (App Router)** para o frontend e **Back4App (Parse Server)** como Backend-as-a-Service (BaaS), permitindo um desenvolvimento rápido e escalável.
 

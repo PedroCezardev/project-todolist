@@ -3,8 +3,8 @@ import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Essence Boutique - Admin',
-  description: 'Sistema de Administração Essence Boutique',
+  title: 'Tarefex',
+  description: 'Aumente sua produtividade a cada dia.',
 };
 
 export default function RootLayout({

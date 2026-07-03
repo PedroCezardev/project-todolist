@@ -24,7 +24,7 @@ html, body {
 
 .layoutContainer {
     display: grid;
-    grid-template-columns: var(--dynamic-sidebar-width) 1fr;
+    grid-template-columns: var(--dynamic-sidebar-width) minmax(0, 1fr);
     grid-template-rows: 1fr;
     height: 100vh;
     width: 100vw;
@@ -43,12 +43,16 @@ html, body {
     display: flex; 
     flex-direction: column;
     height: 100vh;
+    min-width: 0;
+    overflow-x: hidden;
 }
 
 .navbar {
     width: 100%;
-    height: var(--navbar-height);
-    flex-shrink: 0; 
+    height: 64px !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
+    flex-shrink: 0 !important; 
     z-index: 1000;
 }
 
@@ -56,13 +60,15 @@ html, body {
     flex-grow: 1;
     padding: 20px;
     overflow-y: hidden;
+    overflow-x: hidden;
+    min-width: 0;
     display: flex;
     flex-direction: column;
 }
 
 html {
   scrollbar-width: thin; /* Deixa a barra mais fina */
-  scrollbar-color: #5C7665 #f1f5f9; /* Cor do polegar / Cor da pista */
+  scrollbar-color: #01479c #f1f5f9; /* Cor do polegar / Cor da pista */
 }
 
 @theme inline {
@@ -180,3 +186,28 @@ html {
     @apply bg-background text-foreground;
   }
 }
+
+@media (max-width: 1024px) {
+  .mainContent {
+    padding: 16px;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .layoutContainer {
+    grid-template-columns: 1fr !important;
+  }
+  .sidebar {
+    display: none !important;
+  }
+  .contentWrapper {
+    grid-column: 1 !important;
+    padding-bottom: 70px;
+  }
+  .mainContent {
+    padding: 12px;
+    overflow-y: auto;
+  }
+}
+

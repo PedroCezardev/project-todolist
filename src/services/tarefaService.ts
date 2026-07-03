@@ -6,6 +6,7 @@ export interface TarefaData {
   categoria: string;
   dificuldade: string;
   concluido: boolean;
+  descricao?: string;
   createdAt?: Date;
 }
 
@@ -22,6 +23,9 @@ export const criarTarefa = async (dados: TarefaData) => {
   tarefa.set("titulo", dados.titulo);
   tarefa.set("categoria", dados.categoria);
   tarefa.set("dificuldade", dados.dificuldade);
+  if (dados.descricao) {
+    tarefa.set("descricao", dados.descricao);
+  }
   tarefa.set("concluido", false);
   tarefa.set("criadoPor", currentUser); 
 
@@ -53,6 +57,7 @@ export const listarTarefas = async (): Promise<TarefaData[]> => {
       categoria: obj.get("categoria"),
       dificuldade: obj.get("dificuldade"),
       concluido: obj.get("concluido"),
+      descricao: obj.get("descricao") || "",
       createdAt: obj.get("createdAt"),
     }));
   } catch (error) {
@@ -92,7 +97,7 @@ export const excluirTarefa = async (id: string) => {
 
 export const atualizarTarefa = async (
   id: string,
-  dados: Pick<TarefaData, 'titulo' | 'categoria' | 'dificuldade'>
+  dados: Pick<TarefaData, 'titulo' | 'categoria' | 'dificuldade' | 'descricao'>
 ) => {
   const Tarefa = Parse.Object.extend("Tarefa");
   const query = new Parse.Query(Tarefa);
@@ -102,6 +107,9 @@ export const atualizarTarefa = async (
     tarefa.set("titulo", dados.titulo);
     tarefa.set("categoria", dados.categoria);
     tarefa.set("dificuldade", dados.dificuldade);
+    if (dados.descricao !== undefined) {
+      tarefa.set("descricao", dados.descricao);
+    }
     await tarefa.save();
     return true;
   } catch (error) {

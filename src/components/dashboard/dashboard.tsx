@@ -91,25 +91,25 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex-grow overflow-y-auto bg-gray-50 p-4 md:p-8 rounded-lg">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="flex-grow overflow-y-auto bg-gray-50 p-3 sm:p-4 md:p-6 lg:p-8 rounded-lg">
+      <div className="mx-auto max-w-7xl space-y-6 lg:space-y-8">
         {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">Dashboard de Proatividade</h1>
-          <p className="text-slate-600">Acompanhe sua evolução e ganho de XP.</p>
+        <div className="space-y-1 sm:space-y-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900">Dashboard de Proatividade</h1>
+          <p className="text-xs sm:text-sm lg:text-base text-slate-600">Acompanhe sua evolução e ganho de XP.</p>
         </div>
         {/* Grid de KPIs */}
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {/* KPI 1: XP Total */}
           <Card className="shadow-md border-l-4 border-l-yellow-400">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-500">XP Acumulado</CardTitle>
-                <Trophy className="h-5 w-5 text-yellow-500" />
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-500">XP Acumulado</CardTitle>
+                <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-slate-900">{kpis.xpTotal} XP</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">{kpis.xpTotal} XP</div>
               <p className="text-xs text-slate-500 mt-1">Pontos totais de tarefas concluídas</p>
             </CardContent>
           </Card>
@@ -118,12 +118,12 @@ export default function DashboardPage() {
           <Card className="shadow-md border-l-4 border-l-green-500">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-500">Missões Concluídas</CardTitle>
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-500">Missões Concluídas</CardTitle>
+                <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-slate-900">{kpis.totalConcluidas}</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">{kpis.totalConcluidas}</div>
               <div className="flex items-center text-xs text-green-600 mt-1">
                 <TrendingUp className="mr-1 h-3 w-3" />
                 {kpis.taxaConclusao}% de aproveitamento
@@ -132,40 +132,40 @@ export default function DashboardPage() {
           </Card>
 
           {/* KPI 3: Pendências */}
-          <Card className="shadow-md border-l-4 border-l-red-400">
+          <Card className="shadow-md border-l-4 border-l-red-400 sm:col-span-2 lg:col-span-1">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-500">Pendências</CardTitle>
-                <Clock className="h-5 w-5 text-red-400" />
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-500">Pendências</CardTitle>
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-slate-900">{kpis.totalPendentes}</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">{kpis.totalPendentes}</div>
               <p className="text-xs text-slate-500 mt-1">Tarefas aguardando conclusão</p>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
           {/* Gráfico 1: Onde está seu foco? (Categorias) */}
           <Card className="shadow-lg">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Onde está seu foco?</CardTitle>
+                <CardTitle className="text-base sm:text-lg lg:text-xl">Onde está seu foco?</CardTitle>
                 <Target className="h-5 w-5 text-slate-500" />
               </div>
-              <CardDescription>Distribuição de tarefas concluídas por categoria</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Distribuição de tarefas concluídas por categoria</CardDescription>
             </CardHeader>
             <CardContent>
               {categoryData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={280}>
                     <PieChart>
                     <Pie
                         data={categoryData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
+                        innerRadius={50}
+                        outerRadius={85}
                         paddingAngle={5}
                         dataKey="value"
                     >
@@ -180,7 +180,7 @@ export default function DashboardPage() {
                     </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[300px] flex items-center justify-center text-gray-400">
+                <div className="h-[280px] flex items-center justify-center text-gray-400 text-sm">
                     Nenhuma tarefa concluída ainda.
                 </div>
               )}
@@ -191,13 +191,13 @@ export default function DashboardPage() {
           <Card className="shadow-lg">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Origem do seu XP</CardTitle>
+                <CardTitle className="text-base sm:text-lg lg:text-xl">Origem do seu XP</CardTitle>
                 <Trophy className="h-5 w-5 text-slate-500" />
               </div>
-              <CardDescription>Quantidade de XP gerado por nível de dificuldade</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Quantidade de XP gerado por nível de dificuldade</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={difficultyData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
@@ -206,7 +206,7 @@ export default function DashboardPage() {
                     cursor={{fill: 'transparent'}}
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   />
-                  <Bar dataKey="xp" fill="#2D2499" radius={[4, 4, 0, 0]} barSize={50}>
+                  <Bar dataKey="xp" fill="#002759" radius={[4, 4, 0, 0]} barSize={45}>
                     {difficultyData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={index === 0 ? '#10b981' : index === 1 ? '#f59e0b' : '#ef4444'} />
                     ))}

@@ -76,14 +76,14 @@ export default function ProfileComponent() {
   }
 
   return (
-    <div className="w-full h-full bg-gray-50 p-6 flex items-center justify-center rounded-lg shadow-xl overflow-y-auto">
-      <Card className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-4 md:p-8">
-        <CardHeader className="border-b bg-white pb-6 mb-6">
-          <CardTitle className="text-2xl font-bold">Perfil do Usuário</CardTitle>
-          <CardDescription>Gerencie suas informações pessoais</CardDescription>
+    <div className="w-full h-full bg-gray-50 p-3 sm:p-4 md:p-6 flex flex-col rounded-lg shadow-xl overflow-y-auto">
+      <Card className="w-full max-w-4xl bg-white rounded-2xl md:rounded-3xl shadow-lg p-4 sm:p-6 lg:p-8 my-auto mx-auto">
+        <CardHeader className="border-b bg-white pb-4 sm:pb-6 mb-4 sm:mb-6">
+          <CardTitle className="text-xl sm:text-2xl font-bold">Perfil do Usuário</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Gerencie suas informações pessoais</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="grid md:grid-cols-[250px_1fr] gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6 lg:gap-8">
             {/* Avatar Section */}
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
@@ -95,7 +95,7 @@ export default function ProfileComponent() {
                 </Avatar>
                 <label
                   htmlFor="avatar-upload"
-                  className="absolute bottom-2 right-2 bg-[#4B3CFF] text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors shadow-lg"
+                  className="absolute bottom-2 right-2 bg-[#006EFF] text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors shadow-lg"
                 >
                   <Camera className="h-4 w-4" />
                   <input
@@ -200,7 +200,7 @@ export default function ProfileComponent() {
                 <Button
                   onClick={handleSave}
                   disabled={saving}
-                  className="bg-[#4B3CFF] hover:bg-blue-700 text-white px-8 py-2 rounded-full shadow-md transition-all hover:shadow-lg"
+                  className="bg-[#002759] hover:bg-[#006EFF] text-white px-8 py-2 rounded-full shadow-md transition-all hover:shadow-lg text-sm sm:text-base"
                 >
                   {saving ? (
                     <>

@@ -1,5 +1,6 @@
 import Navbar from "@/components/navbar/navbar";
 import Sidebar from "@/components/sidebar/sidebar";
+import MobileBottomNav from "@/components/navbar/mobile-bottom-nav";
 
 export default function Layout({
   children,
@@ -14,6 +15,7 @@ export default function Layout({
         <main className="mainContent">
           {children}
         </main>
+        <MobileBottomNav />
       </div>
     </div>
   );
